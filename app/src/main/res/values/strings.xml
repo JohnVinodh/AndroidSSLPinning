@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SSLPinning</string>
+    <string name="enter_the_service_url_hint">Enter the Service URL</string>
+</resources>
