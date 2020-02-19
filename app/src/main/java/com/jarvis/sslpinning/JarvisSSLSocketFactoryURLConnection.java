@@ -22,6 +22,8 @@ import java.util.List;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
@@ -42,7 +44,7 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
     private static int mSDKVersion;
     private static int mNetworkTrustConfig = NETWORK_TRUST_CONFIG_ONLY_BUNDLED;
     private static TrustManager[] tMgrs = null;
-
+    private static boolean verifyHostName = true;
     private SSLContext getSSLContext() throws IOException {
         return createSSLContext();
     }
@@ -139,7 +141,7 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
         //Register Handshake listener only in debug mode to Print Protocol and CipherSuites info
         if (sckt instanceof SSLSocket) {
             SSLSocket sslSocket = (SSLSocket) sckt;
-            sslSocket.addHandshakeCompletedListener(new JarvisHandShakeListener());
+            sslSocket.addHandshakeCompletedListener(new JarvisHandShakeListener()); // API Key : AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE
         }
         return sckt;
     }
@@ -418,6 +420,25 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
                 Log.d(TAG, "SSL Handshake Completed Successfully");
                 Log.d(TAG, "Connection is using SSL/TLS protocol: " + session.getProtocol() + " connected to host: " + session.getPeerHost() + " using cipher suit: " + session.getCipherSuite());
             }
+        }
+    }
+
+    public static SSLSocketFactory getSocketFactory() {
+        return new JarvisSSLSocketFactoryURLConnection();
+    }
+
+    private static HostnameVerifier noHostNameVerifier = new HostnameVerifier() {
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
+
+    public static void setHostNameVerifier(HttpsURLConnection connection) {
+        if ((mNetworkTrustConfig == NETWORK_TRUST_CONFIG_ALL) || verifyHostName == false) {
+            //This hostname verifier can be used for testing with local servers
+            connection.setHostnameVerifier(noHostNameVerifier);
+        } else {
+            //Retain the default hostname verifier offered by URLConnection
         }
     }
 }

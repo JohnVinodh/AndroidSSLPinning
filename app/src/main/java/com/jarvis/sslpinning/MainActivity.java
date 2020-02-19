@@ -7,41 +7,38 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.jarvis.sslpinning.utilities.HTTPAsyncTask;
+import com.jarvis.sslpinning.utilities.HttpsServiceMetaData;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements HTTPAsyncTask.HttpAsyncTaskListener {
 
     private EditText mEditTextURL;
-    public static final String HTTP_POST = "POST";
-    public static final String HTTP_GET = "GET";
-    public static final String HTTP_PUT = "PUT";
-    public static final String HTTP_DELETE = "DELETE";
-    public static final String HTTP_HEAD = "HEAD";
     private static Context activity_context;
+    private ProgressBar mProgressBarLoadingIndicator;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity_context = this;
         setContentView(R.layout.activity_main);
         mEditTextURL = findViewById(R.id.ed_url);
+        //String url = getResources().getString(R.string.booksBaseURL) + "?q=" + "JohnVinodh" + "&key=" + getResources().getString(R.string.books_api_key);
+        mEditTextURL.setText(R.string.test_service_url);
+        mProgressBarLoadingIndicator = findViewById(R.id.loadingIndicator);
     }
 
     public void onBtnServiceCallClick(View view) {
-      String url = mEditTextURL.getText().toString();
-        URI requesturi = null;
-        try {
-            requesturi = new URI(url);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        if (requesturi.toString().startsWith("https://")) {
-            //JarvisSSLSocketFactoryURLConnection.setHostNameVerifier((HttpsURLConnection)connection);
-            //((HttpsURLConnection) connection).setSSLSocketFactory(KonySSLSocketFactoryURLConnection.getSocketFactory());
-        }
+        String url = mEditTextURL.getText().toString();
+      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(null, HttpsServiceMetaData.HTTP_GET,"getBooks",getActivityContext());
+      httpAsyncTask.setHTTPAsyncTaskListener(MainActivity.this);
+      httpAsyncTask.execute(url);
     }
 
     public static Context getAppContext() {
@@ -50,5 +47,16 @@ public class MainActivity extends AppCompatActivity {
 
     public static Context getActivityContext() {
       return activity_context;
+    }
+
+    @Override
+    public void onHttpTaskCompleted(String result) {
+        mProgressBarLoadingIndicator.setVisibility(View.GONE);
+        Toast.makeText(getActivityContext(),"response is ::"+result,Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void httpTaskIsInProgress() {
+        mProgressBarLoadingIndicator.setVisibility(View.VISIBLE);
     }
 }
