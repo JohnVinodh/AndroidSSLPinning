@@ -3,6 +3,8 @@
     <string name="enter_the_service_url_hint">Enter the Service URL</string>
     <string name="click_to_make_a_service_call">Click to make a Service call</string>
     <string name="test_service_url">https://www.googleapis.com/books/v1/volumes?q=john&amp;key=AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE</string>
+    <string name="test_service_doha">https://mb.dohabank.com/services/DohaBankMFAppGenerationService8/GetPreLoginExchangeRatesOp</string>
+    <string name="test_service_dbx">app/src/main/java/com/jarvis/sslpinning/JarvisSSLSocketFactoryURLConnection.java</string>
     <string name="booksBaseURL">https://www.googleapis.com/books/v1/volumes</string>
     <string name="books_api_key">AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE</string>
 </resources>

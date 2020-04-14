@@ -19,7 +19,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.HostnameVerifier;
@@ -398,7 +397,7 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
                     argsCipherSuites = list.toArray(new String[list.size()]);
                     sslSocket.setEnabledCipherSuites(argsCipherSuites);
                 }
-            } else {//5.0 and above we are just printing default enabled ciphers usites ond evice for debugging purpose.
+            } else {//5.0 and above we are just printing default enabled ciphers usites on device for debugging purpose.
                 argsProtocols = sslSocket.getEnabledProtocols();
                 argsCipherSuites = sslSocket.getEnabledCipherSuites();
             }

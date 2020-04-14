@@ -30,13 +30,16 @@ public class MainActivity extends AppCompatActivity implements HTTPAsyncTask.Htt
         setContentView(R.layout.activity_main);
         mEditTextURL = findViewById(R.id.ed_url);
         //String url = getResources().getString(R.string.booksBaseURL) + "?q=" + "JohnVinodh" + "&key=" + getResources().getString(R.string.books_api_key);
-        mEditTextURL.setText(R.string.test_service_url);
+        mEditTextURL.setText(R.string.test_service_dbx);
         mProgressBarLoadingIndicator = findViewById(R.id.loadingIndicator);
     }
 
     public void onBtnServiceCallClick(View view) {
         String url = mEditTextURL.getText().toString();
-      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(null, HttpsServiceMetaData.HTTP_GET,"getBooks",getActivityContext());
+        String pData = "{\n" +
+                "\"language\" : \"EN\"\n" +
+                "}";
+      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(pData, HttpsServiceMetaData.HTTP_POST,"getInfoSupportData",getActivityContext());
       httpAsyncTask.setHTTPAsyncTaskListener(MainActivity.this);
       httpAsyncTask.execute(url);
     }
