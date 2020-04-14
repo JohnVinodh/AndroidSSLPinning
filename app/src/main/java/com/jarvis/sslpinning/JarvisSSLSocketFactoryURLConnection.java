@@ -41,7 +41,7 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
     private static int NETWORK_TRUST_CONFIG_ALL = 2;
     private static int NETWORK_TRUST_CONFIG_ALLOW_PINNED = 3;
     private static int mSDKVersion;
-    private static int mNetworkTrustConfig = NETWORK_TRUST_CONFIG_ONLY_BUNDLED;
+    private static int mNetworkTrustConfig = NETWORK_TRUST_CONFIG_NONE;
     private static TrustManager[] tMgrs = null;
     private static boolean verifyHostName = true;
     private SSLContext getSSLContext() throws IOException {
