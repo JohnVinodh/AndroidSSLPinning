@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements HTTPAsyncTask.Htt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity_context = this;
+
         setContentView(R.layout.activity_main);
         mEditTextURL = findViewById(R.id.ed_url);
         //String url = getResources().getString(R.string.booksBaseURL) + "?q=" + "JohnVinodh" + "&key=" + getResources().getString(R.string.books_api_key);
@@ -39,6 +40,12 @@ public class MainActivity extends AppCompatActivity implements HTTPAsyncTask.Htt
         String pData = "{\n" +
                 "\"language\" : \"EN\"\n" +
                 "}";
+        String test = "{\n" +
+                "   \"appID\":\"DohaBankR6S1\",\n" +
+                "   \"serviceID\":\"getResourceBundle\",\n" +
+                "   \"channel\":\"rc\"\n" +
+                "}";
+
       HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(pData, HttpsServiceMetaData.HTTP_POST,"getInfoSupportData",getActivityContext());
       httpAsyncTask.setHTTPAsyncTaskListener(MainActivity.this);
       httpAsyncTask.execute(url);
