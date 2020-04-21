@@ -175,7 +175,7 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
         if(isGZIPEnabled)
             mConnection.setRequestProperty("Accept-Encoding", "gzip,deflate");
 
-        mConnection.setRequestProperty("Content-Type", "application/json");
+        //mConnection.setRequestProperty("Content-Type", "application/json");
         mConnection.setInstanceFollowRedirects(false);
         return true;
     }

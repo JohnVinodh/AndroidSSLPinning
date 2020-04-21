@@ -2,6 +2,8 @@ package com.jarvis.sslpinning;
 
 import android.util.Log;
 
+import com.konylabs.api.net.KonyAllowAllTrustManager;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,9 +96,10 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
                 return new TrustManager[]{tm};
             }
         } else if (mNetworkTrustConfig == NETWORK_TRUST_CONFIG_ALL) {
-            //X509TrustManager tmf = KonyAllowAllTrustManager.getInstance();
-            //return new TrustManager[] {tmf};
-            Log.d(TAG, "Not handling Selfsigned certificates");
+            Log.d(TAG, "handling Selfsigned certificates");
+            X509TrustManager tmf = KonyAllowAllTrustManager.getInstance();
+            return new TrustManager[] {tmf};
+
         }
         return null;
     }
