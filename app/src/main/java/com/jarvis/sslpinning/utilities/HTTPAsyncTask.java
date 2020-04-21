@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.jarvis.sslpinning.JarvisSSLSocketFactoryURLConnection;
+import com.jarvis.sslpinning.R;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -159,6 +161,20 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
         } else {
             mConnection.setRequestProperty("Connection", "close");
         }
+        boolean bExpect100Continue = Boolean.parseBoolean(mContext.getResources().getString(R.string.expect_100_continue));
+
+       /* int resId  = mContext.getResources().getIdentifier("expect_100_continue", "string", mContext.getPackageName());
+        if(mContext.getString(resId).equalsIgnoreCase("true"))
+            bExpect100Continue = true;
+        else
+            bExpect100Continue = false;*/
+
+        if (bExpect100Continue && (mHTTPMethod.equals(HttpsServiceMetaData.HTTP_POST) || mHTTPMethod.equals(HttpsServiceMetaData.HTTP_PUT)))
+            mConnection.setRequestProperty("Expect", "100-continue");
+        boolean isGZIPEnabled = Boolean.parseBoolean(mContext.getResources().getString(R.string.enable_gzip));
+        if(isGZIPEnabled)
+            mConnection.setRequestProperty("Accept-Encoding", "gzip,deflate");
+
         mConnection.setRequestProperty("Content-Type", "application/json");
         mConnection.setInstanceFollowRedirects(false);
         return true;

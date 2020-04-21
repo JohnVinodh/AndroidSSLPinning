@@ -7,4 +7,12 @@
     <string name="test_service_dbx">https://mobileuat.bankofjordan.com/services/data/v1/RBObjects/operations/Informationcontent/getInfoSupportData</string>
     <string name="booksBaseURL">https://www.googleapis.com/books/v1/volumes</string>
     <string name="books_api_key">AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE</string>
+    <item type="string" name="expect_100_continue">true</item>
+    <item type="string" name="enable_gzip">true</item>
+    <!-- Enable/Disable connection pooling feature. Supported values are true and false This is invalid for this application-->
+    <!--<item type="string" name="enable_conn_pool">true</item>-->
+    <!-- Total number of connections in pool -->
+    <item type="string" name="conn_total">20</item>
+    <!-- Connection per route in pool -->
+    <item type="string" name="conn_per_route">10</item>
 </resources>
