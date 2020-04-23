@@ -22,10 +22,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -37,6 +41,10 @@ import static android.content.Context.WINDOW_SERVICE;
 public class Utils {
     private Context mContext = null;
     private static String TAG = Utils.class.getSimpleName();
+    private static InputStream mInputStream = null;
+    private static   String result = "";
+    private static  String responseType = "";
+    //private static  HttpURLConnection mConnection = null;
     public Utils(Context pContext) {
         mContext = pContext;
     }
@@ -122,9 +130,8 @@ public class Utils {
 
     public static boolean setConnectionParams(String url, HttpURLConnection connection,String pHTTPMethod,Context pContext ) {
         URI requesturi = null;
-        HttpURLConnection  mConnection = null;
+        HttpURLConnection  mConnection = connection;
         StringBuffer newurl = new StringBuffer(url);
-        if(connection !=null)
           mConnection = connection;
         mConnection.setRequestProperty("Cache-Control", "no-cache");
         mConnection.setUseCaches(false);
@@ -140,8 +147,7 @@ public class Utils {
                 mConnection.setRequestMethod("POST");
             } else if (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_PUT)) {
                 mConnection.setRequestMethod("PUT");
-            }
-            {
+            } else {
                 Log.i(TAG, "http request method is " + pHTTPMethod);
             }
         } catch (URISyntaxException e) {
@@ -175,21 +181,18 @@ public class Utils {
         } else {
             mConnection.setRequestProperty("Connection", "close");
         }
-        boolean bExpect100Continue = Boolean.parseBoolean(pContext.getResources().getString(R.string.expect_100_continue));
 
-       /* int resId  = mContext.getResources().getIdentifier("expect_100_continue", "string", mContext.getPackageName());
-        if(mContext.getString(resId).equalsIgnoreCase("true"))
-            bExpect100Continue = true;
-        else
-            bExpect100Continue = false;*/
-
-        if (bExpect100Continue && (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_POST) || pHTTPMethod.equals(HttpsServiceMetaData.HTTP_PUT)))
+        if (HttpsServiceMetaData.EXPECT_100_CONTINUE && (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_POST) || pHTTPMethod.equals(HttpsServiceMetaData.HTTP_PUT)))
             mConnection.setRequestProperty("Expect", "100-continue");
         boolean isGZIPEnabled = Boolean.parseBoolean(pContext.getResources().getString(R.string.enable_gzip));
-        if(isGZIPEnabled)
+        if(HttpsServiceMetaData.IS_GZIP_ENABLED) {
             mConnection.setRequestProperty("Accept-Encoding", "gzip,deflate");
-
-        //mConnection.setRequestProperty("Content-Type", "application/json");
+            Log.i(TAG,"ContentType is :: gzip,deflate");
+        }
+         else {
+            mConnection.setRequestProperty("Content-Type", "application/json");
+            Log.i(TAG,"ContentType is :: application/json");
+        }
         mConnection.setInstanceFollowRedirects(false);
         return true;
     }
@@ -213,5 +216,69 @@ public class Utils {
 
         Log.i(TAG,"getResponseContentType::"+contentType);
         return contentType;
+    }
+
+    public static String invokeServiceCall(String purl, String pData,HttpURLConnection pHttpURLConnection,String pHTTPMethod,Context pContext) {
+        int respCode = 0;
+        HttpURLConnection mConnection = pHttpURLConnection;
+        try {
+            //URL url = new URL(purl);
+           // mConnection = (HttpURLConnection) url.openConnection();
+            boolean paramsSetSuccess = setConnectionParams(purl,mConnection,pHTTPMethod,pContext);
+            if (paramsSetSuccess == false) {
+                Log.i(TAG,"unable to set the parameters so exiting the service call");
+                return"";
+            }
+            if (pData != null && !pData.isEmpty() && pHTTPMethod.equalsIgnoreCase("POST")) {
+                OutputStream os = mConnection.getOutputStream();
+                os.write(pData.getBytes());
+                os.flush();
+                safeCloseStream(os);
+            }
+            respCode = mConnection.getResponseCode();
+            responseType = Utils.getResponseContentType(mConnection);
+            if (responseType == HttpsServiceMetaData.HTTP_RESPONSE_TYPE_RAWDATA) {
+                // Need to implement if the output is rawbytes.
+            } else {
+                mInputStream = (respCode == 200 || respCode == 201) ? mConnection.getInputStream() : mConnection.getErrorStream();
+            }
+            //mInStream = (mRespCode == 200 || mRespCode == 201) ? mConnection.getInputStream(): mConnection.getErrorStream();
+            result = convertInputStreamToString(mInputStream);
+
+            //if(pNetworkTaskListener !=null)
+              //  pNetworkTaskListener.onNetworkCallCompleted(result);
+            Log.i(TAG, "Response :: " + result+"Thread info is ::"+Thread.currentThread().getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            Log.i(TAG, "Generic exception :: " + e.getMessage());
+        } finally {
+            closeConnection(mConnection,purl);
+        }
+        return result;
+    }
+
+    private static void closeConnection(HttpURLConnection connection, String requestUrl) {
+        printThreadSignatureAndStackTrace();
+        if(responseType != HttpsServiceMetaData.HTTP_RESPONSE_TYPE_RAWDATA) {
+            //Close connection if responseType is not a rawbytes case as the stream is yet to read in case of rawbytes.
+            if(connection != null) {
+                Log.i(TAG,"Entered the close section and connection is not null");
+                connection.disconnect();
+                Log.i(TAG,"Connection Closed for the url ::"+requestUrl);
+            }
+        }
+    }
+    public static void printThreadSignatureAndStackTrace() {
+        Thread t = Thread.currentThread();
+        long l = t.getId();
+        String name = t.getName();
+        long p = t.getPriority();
+        String gname = t.getThreadGroup().getName();
+        StringWriter w = new StringWriter();
+        Exception e = new Exception();
+        e.printStackTrace(new PrintWriter(w));
+        System.out.println("Thread Signature : id = " + name + " , priority = " + p + " , group = " + gname + " , stacktrace = " + w.toString().replace("\n", " ").replace("\r", " "));
+
     }
 }

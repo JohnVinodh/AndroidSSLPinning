@@ -1,13 +1,14 @@
 <resources>
     <string name="app_name">SSLPinning</string>
-    <string name="enter_the_service_url_hint">Enter the Service URL</string>
+    <string name="enter_the_service_url_hint">Enter the EndPoint URL</string>
     <string name="click_to_make_a_service_call">Service Call using HTTPAsyncTask</string>
-    <string name="click_to_make_a_service_call_multi">Service Call using MultiThreads</string>
+    <string name="click_to_make_a_service_call_multi">Service Call using Threads</string>
     <string name="test_service_url">https://www.googleapis.com/books/v1/volumes?q=john&amp;key=AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE</string>
     <string name="test_service_doha">https://mb.dohabank.com/services/DohaBankMFAppGenerationService8/GetPreLoginExchangeRatesOp</string>
     <string name="test_service_dbx">https://mobileuat.bankofjordan.com/services/data/v1/RBObjects/operations/Informationcontent/getInfoSupportData</string>
     <string name="booksBaseURL">https://www.googleapis.com/books/v1/volumes</string>
     <string name="books_api_key">AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE</string>
+    <string name="enter_the_number_of_threads">Enter the number of threads</string>
     <item type="string" name="expect_100_continue">true</item>
     <item type="string" name="enable_gzip">true</item>
     <!-- Enable/Disable connection pooling feature. Supported values are true and false This is invalid for this application-->
@@ -16,4 +17,12 @@
     <item type="string" name="conn_total">20</item>
     <!-- Connection per route in pool -->
     <item type="string" name="conn_per_route">10</item>
+
+    <string-array name="request_method_arrays">
+        <item>GET</item>
+        <item>POST</item>
+       <!-- <item>PUT</item>
+        <item>DELETE</item>
+        <item>HEAD</item>-->
+    </string-array>
 </resources>

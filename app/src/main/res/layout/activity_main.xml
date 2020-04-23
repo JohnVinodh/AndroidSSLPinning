@@ -16,6 +16,24 @@
         android:hint="@string/enter_the_service_url_hint"
         android:inputType="textUri"
         android:autofillHints="" tools:targetApi="o"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ed_thread_count"
+        android:layout_margin="20dp"
+        android:hint="@string/enter_the_number_of_threads"
+        android:inputType="textUri"
+        android:autofillHints="" tools:targetApi="o"/>
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:id="@+id/spinner_http_methods"
+        android:textAlignment="gravity"
+        android:gravity="center"
+        android:entries="@array/request_method_arrays"/>
+
      <Button
          android:layout_width="match_parent"
          android:layout_margin="20dp"

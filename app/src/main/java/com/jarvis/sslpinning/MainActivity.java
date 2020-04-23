@@ -1,49 +1,48 @@
 package com.jarvis.sslpinning;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.jarvis.sslpinning.utilities.HTTPAsyncTask;
-import com.jarvis.sslpinning.utilities.HttpAsyncTaskListener;
 import com.jarvis.sslpinning.utilities.HttpsServiceMetaData;
+import com.jarvis.sslpinning.utilities.NetworkTaskListener;
 import com.jarvis.sslpinning.utilities.Utils;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
+public class MainActivity extends AppCompatActivity implements NetworkTaskListener {
 
-public class MainActivity extends AppCompatActivity implements HttpAsyncTaskListener {
-
-    private EditText mEditTextURL;
+    private EditText mEditTextURL,mEditTextThreadCount;
     private static Context activity_context;
     private ProgressBar mProgressBarLoadingIndicator;
-    private HttpAsyncTaskListener mHttpAsyncTaskListener;
+    private NetworkTaskListener mNetworkTaskListener;
+    private Spinner mSpinner;
     private static final String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity_context = this;
-
         setContentView(R.layout.activity_main);
         mEditTextURL = findViewById(R.id.ed_url);
+        mEditTextThreadCount = findViewById(R.id.ed_thread_count);
+        mSpinner = findViewById(R.id.spinner_http_methods);
         //String url = getResources().getString(R.string.booksBaseURL) + "?q=" + "JohnVinodh" + "&key=" + getResources().getString(R.string.books_api_key);
         mEditTextURL.setText(R.string.test_service_dbx);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.request_method_arrays, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        mSpinner.setAdapter(adapter);
         mProgressBarLoadingIndicator = findViewById(R.id.loadingIndicator);
     }
 
@@ -57,77 +56,52 @@ public class MainActivity extends AppCompatActivity implements HttpAsyncTaskList
                 "   \"serviceID\":\"getResourceBundle\",\n" +
                 "   \"channel\":\"rc\"\n" +
                 "}";
-
-      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(pData, HttpsServiceMetaData.HTTP_POST,"getInfoSupportData",getActivityContext());
-      httpAsyncTask.setHTTPAsyncTaskListener(MainActivity.this);
+      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(pData, mSpinner.getSelectedItem().toString(),"getInfoSupportData",activity_context);
+      httpAsyncTask.setNetworkTaskTaskListener(MainActivity.this);
       httpAsyncTask.execute(url);
 
     }
 
     public void onBtnServiceCallMultithreadsClick(View view) {
         final String url = mEditTextURL.getText().toString();
+        HttpsServiceMetaData.threadCount = Integer.parseInt(mEditTextThreadCount.getText().toString());
         final String test = "{\n" +
                 "   \"appID\":\"DohaBankR6S1\",\n" +
                 "   \"serviceID\":\"getResourceBundle\",\n" +
                 "   \"channel\":\"rc\"\n" +
                 "}";
+        final String data = "{}";
 
-        String result = "";
-        mHttpAsyncTaskListener = (HttpAsyncTaskListener) MainActivity.this;
+        mNetworkTaskListener = (NetworkTaskListener) activity_context;
+        final String[] res = new String[1];
+        if(mNetworkTaskListener !=null)
+            mNetworkTaskListener.onNetworkCallIsInProgress();
         //Using multiple threads to make a service call.
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 Looper.prepare();
-                executeServiceCall(url,test,HttpsServiceMetaData.HTTP_POST);
+                URL uRL = null;
+                try {
+                    uRL = new URL(url);
+                    HttpURLConnection connection =(HttpURLConnection) uRL.openConnection();
+                    if(mNetworkTaskListener !=null)
+                        res[0] =   Utils.invokeServiceCall(url,data,connection,mSpinner.getSelectedItem().toString(),activity_context);
+                    mNetworkTaskListener.onNetworkCallCompleted(res[0]);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Looper.loop();
             }
         };
 
-        for(int i =0; i<=5; i++) {
+        for(int i =1; i<=HttpsServiceMetaData.threadCount; i++) {
             new Thread(runnable).start();
         }
-    }
-    private void executeServiceCall(String url, String pData,String pHTTPMethod) {
-        int respCode = 0;
-        InputStream inputStream = null;
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) (new URL(url)).openConnection();
-            boolean paramsSetSuccess = Utils.setConnectionParams(url,connection,pHTTPMethod,getApplicationContext());
-            if (paramsSetSuccess == false) {
-                Log.i(TAG,"unable to set the parameters so exiting the service call");
-                return;
-            }
-            if (pData != null && !pData.isEmpty() && pHTTPMethod.equalsIgnoreCase("POST")) {
-                OutputStream os = connection.getOutputStream();
-                os.write(pData.getBytes());
-                os.flush();
-                Utils.safeCloseStream(os);
-            }
-            respCode = connection.getResponseCode();
-            String responseType = Utils.getResponseContentType(connection);
-            if (responseType == HttpsServiceMetaData.HTTP_RESPONSE_TYPE_RAWDATA) {
-                // Need to implement if the output is rawbytes.
-            } else {
-                inputStream = (respCode == 200 || respCode == 201) ? connection.getInputStream() : connection.getErrorStream();
-            }
-            //mInStream = (mRespCode == 200 || mRespCode == 201) ? mConnection.getInputStream(): mConnection.getErrorStream();
-            String result = Utils.convertInputStreamToString(inputStream);
-            if(mHttpAsyncTaskListener !=null)
-                mHttpAsyncTaskListener.onNetworkCallCompleted(result);
-            Log.i("Kony", "Response :: " + result);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            Log.i(TAG, "Generic exception :: " + e.getMessage());
-        } finally {
-
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-
     }
 
     public static Context getAppContext() {

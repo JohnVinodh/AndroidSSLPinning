@@ -1,6 +1,6 @@
 package com.jarvis.sslpinning.utilities;
 
-public interface HttpAsyncTaskListener {
+public interface NetworkTaskListener {
 
     void onNetworkCallCompleted(String result);
     void onNetworkCallIsInProgress();
