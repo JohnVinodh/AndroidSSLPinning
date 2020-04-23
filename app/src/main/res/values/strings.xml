@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">SSLPinning</string>
     <string name="enter_the_service_url_hint">Enter the Service URL</string>
-    <string name="click_to_make_a_service_call">Click to make a Service call</string>
+    <string name="click_to_make_a_service_call">Service Call using HTTPAsyncTask</string>
+    <string name="click_to_make_a_service_call_multi">Service Call using MultiThreads</string>
     <string name="test_service_url">https://www.googleapis.com/books/v1/volumes?q=john&amp;key=AIzaSyB9-hOU1lRI5-pZ92F-YhwOtLvwZ3cEqrE</string>
     <string name="test_service_doha">https://mb.dohabank.com/services/DohaBankMFAppGenerationService8/GetPreLoginExchangeRatesOp</string>
     <string name="test_service_dbx">https://mobileuat.bankofjordan.com/services/data/v1/RBObjects/operations/Informationcontent/getInfoSupportData</string>

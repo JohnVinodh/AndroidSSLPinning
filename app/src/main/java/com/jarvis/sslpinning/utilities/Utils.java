@@ -12,6 +12,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.jarvis.sslpinning.JarvisSSLSocketFactoryURLConnection;
+import com.jarvis.sslpinning.R;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -19,6 +22,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import static android.content.Context.WINDOW_SERVICE;
 
@@ -109,5 +118,100 @@ public class Utils {
             }
             fs = null;
         }
+    }
+
+    public static boolean setConnectionParams(String url, HttpURLConnection connection,String pHTTPMethod,Context pContext ) {
+        URI requesturi = null;
+        HttpURLConnection  mConnection = null;
+        StringBuffer newurl = new StringBuffer(url);
+        if(connection !=null)
+          mConnection = connection;
+        mConnection.setRequestProperty("Cache-Control", "no-cache");
+        mConnection.setUseCaches(false);
+        try {
+            requesturi = new URI(newurl.toString());
+            if (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_DELETE)) {
+                mConnection.setRequestMethod("DELETE");
+            } else if (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_GET)) {
+                mConnection.setRequestMethod("GET");
+            } else if (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_HEAD)) {
+                mConnection.setRequestMethod("HEAD");
+            } else if (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_POST)) {
+                mConnection.setRequestMethod("POST");
+            } else if (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_PUT)) {
+                mConnection.setRequestMethod("PUT");
+            }
+            {
+                Log.i(TAG, "http request method is " + pHTTPMethod);
+            }
+        } catch (URISyntaxException e) {
+            {
+                Log.e(TAG, "" + e.getMessage());
+            }
+            return false;
+        } catch (ProtocolException e) {
+            {
+                Log.e(TAG, "" + e.getMessage());
+            }
+            return false;
+        }
+        if (HttpsServiceMetaData.timeoutIntervalForRequest != null) {
+            mConnection.setConnectTimeout(HttpsServiceMetaData.timeoutIntervalForRequest * 1000);
+
+            Log.i(TAG, "setConnectionParams : timeoutIntervalForRequest : setConnectTimeout :: " + HttpsServiceMetaData.timeoutIntervalForRequest);
+        }
+        if (HttpsServiceMetaData.timeoutIntervalForResource != null) {
+            mConnection.setReadTimeout(HttpsServiceMetaData.timeoutIntervalForResource * 1000);
+
+            Log.i(TAG, "setConnectionParams : timeoutIntervalForResource : setReadTimeout :: " + HttpsServiceMetaData.timeoutIntervalForResource);
+
+        }
+        if (requesturi.toString().startsWith("https://")) {
+            JarvisSSLSocketFactoryURLConnection.setHostNameVerifier((HttpsURLConnection) mConnection);
+            ((HttpsURLConnection) mConnection).setSSLSocketFactory(JarvisSSLSocketFactoryURLConnection.getSocketFactory());
+        }
+        if (HttpsServiceMetaData.enableKeepAlive) {
+            mConnection.setRequestProperty("Connection", "Keep-Alive");
+        } else {
+            mConnection.setRequestProperty("Connection", "close");
+        }
+        boolean bExpect100Continue = Boolean.parseBoolean(pContext.getResources().getString(R.string.expect_100_continue));
+
+       /* int resId  = mContext.getResources().getIdentifier("expect_100_continue", "string", mContext.getPackageName());
+        if(mContext.getString(resId).equalsIgnoreCase("true"))
+            bExpect100Continue = true;
+        else
+            bExpect100Continue = false;*/
+
+        if (bExpect100Continue && (pHTTPMethod.equals(HttpsServiceMetaData.HTTP_POST) || pHTTPMethod.equals(HttpsServiceMetaData.HTTP_PUT)))
+            mConnection.setRequestProperty("Expect", "100-continue");
+        boolean isGZIPEnabled = Boolean.parseBoolean(pContext.getResources().getString(R.string.enable_gzip));
+        if(isGZIPEnabled)
+            mConnection.setRequestProperty("Accept-Encoding", "gzip,deflate");
+
+        //mConnection.setRequestProperty("Content-Type", "application/json");
+        mConnection.setInstanceFollowRedirects(false);
+        return true;
+    }
+
+
+    public static String getResponseContentType(HttpURLConnection conn) {
+        if (conn == null)
+            return "";
+        String contentType = null;
+        String header = conn.getContentType();
+        if (header == null)
+            return HttpsServiceMetaData.HTTP_RESPONSE_TYPE_RAWDATA;
+        else if (header.contains("application/text") || header.contains("text/plain"))
+            contentType = HttpsServiceMetaData.HTTP_RESPONSE_TYPE_TEXT;
+        else if (header.contains("application/json"))
+            contentType = HttpsServiceMetaData.HTTP_RESPONSE_TYPE_JSON;
+        else if (header.contains("application/xml") || header.contains("text/xml") || header.contains("text/html") || header.contains("application/rss+xml"))
+            contentType = HttpsServiceMetaData.HTTP_RESPONSE_TYPE_DOCUMENT;
+        else
+            contentType = HttpsServiceMetaData.HTTP_RESPONSE_TYPE_RAWDATA;
+
+        Log.i(TAG,"getResponseContentType::"+contentType);
+        return contentType;
     }
 }
