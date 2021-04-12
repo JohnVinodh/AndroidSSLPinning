@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity implements NetworkTaskListen
         mEditTextURL = findViewById(R.id.ed_url);
         mEditTextThreadCount = findViewById(R.id.ed_thread_count);
         mSpinner = findViewById(R.id.spinner_http_methods);
-        //String url = getResources().getString(R.string.booksBaseURL) + "?q=" + "JohnVinodh" + "&key=" + getResources().getString(R.string.books_api_key);
-        mEditTextURL.setText(R.string.test_service_dbx);
+        //String url = getResources().getString(R.string.test_service_healogics);//getResources().getString(R.string.booksBaseURL) + "?q=" + "JohnVinodh" + "&key=" + getResources().getString(R.string.books_api_key);
+        mEditTextURL.setText(R.string.test_service_url);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.request_method_arrays, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
@@ -47,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements NetworkTaskListen
     }
 
     public void onBtnServiceCallClick(View view) {
-       final String url = mEditTextURL.getText().toString();
+       final String url = mEditTextURL.getText().toString();//getResources().getString(R.string.test_service_dbx);//mEditTextURL.getText().toString();
+       String data = null;
         String pData = "{\n" +
                 "\"language\" : \"EN\"\n" +
                 "}";
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements NetworkTaskListen
                 "   \"serviceID\":\"getResourceBundle\",\n" +
                 "   \"channel\":\"rc\"\n" +
                 "}";
-      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(pData, mSpinner.getSelectedItem().toString(),"getInfoSupportData",activity_context);
+      HTTPAsyncTask httpAsyncTask = new HTTPAsyncTask(data, mSpinner.getSelectedItem().toString(),"getInfoSupportData",activity_context);
       httpAsyncTask.setNetworkTaskTaskListener(MainActivity.this);
       httpAsyncTask.execute(url);
 

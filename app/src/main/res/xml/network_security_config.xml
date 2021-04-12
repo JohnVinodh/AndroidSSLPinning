@@ -7,10 +7,10 @@
             <certificates src="@raw/fiddler"/>
         </trust-anchors>
     </domain-config>-->
-    <base-config>
+ <!--   <base-config>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
-    </base-config>
+    </base-config>-->
 </network-security-config>

@@ -2,7 +2,7 @@ package com.jarvis.sslpinning;
 
 import android.util.Log;
 
-import com.konylabs.api.net.KonyAllowAllTrustManager;
+import com.jarvis.sslpinning.net.JarvisAllowAllTrustManager;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
     private static int NETWORK_TRUST_CONFIG_ALL = 2;
     private static int NETWORK_TRUST_CONFIG_ALLOW_PINNED = 3;
     private static int mSDKVersion;
-    private static int mNetworkTrustConfig = NETWORK_TRUST_CONFIG_NONE;
+    private static int mNetworkTrustConfig = NETWORK_TRUST_CONFIG_ONLY_BUNDLED;
     private static TrustManager[] tMgrs = null;
     private static boolean verifyHostName = true;
     private SSLContext getSSLContext() throws IOException {
@@ -97,7 +97,7 @@ public class JarvisSSLSocketFactoryURLConnection extends SSLSocketFactory {
             }
         } else if (mNetworkTrustConfig == NETWORK_TRUST_CONFIG_ALL) {
             Log.d(TAG, "handling Selfsigned certificates");
-            X509TrustManager tmf = KonyAllowAllTrustManager.getInstance();
+            X509TrustManager tmf = JarvisAllowAllTrustManager.getInstance();
             return new TrustManager[] {tmf};
 
         }

@@ -16,6 +16,6 @@ public class HttpsServiceMetaData {
     public static final String HTTP_RESPONSE_TYPE_DOCUMENT = "document"; //	application/xml , text/xml
     public static final String HTTP_RESPONSE_TYPE_RAWDATA = "rawdata"; //	anything apart from above
     public static boolean EXPECT_100_CONTINUE = true;
-    public static  boolean IS_GZIP_ENABLED = true;
+    public static  boolean IS_GZIP_ENABLED = false;
     public static int threadCount = 1;
 }
